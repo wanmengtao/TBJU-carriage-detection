@@ -79,23 +79,9 @@ git clone https://github.com/wanmengtao/TBJU-carriage-detection.git
 cd TBJU-carriage-detection
 ```
 
-### 2. 运行推理应用（Windows PC）
+### 2. RK3588 开发板 — 运行推理应用
 
-```bash
-cd TBJU_edge_inference_app
-
-# 安装依赖
-pip install -r requirements.txt
-pip install ultralytics torch onnxruntime
-
-# 启动 GUI
-python run_gui.py
-
-# 或运行冒烟测试
-python run_smoke_test.py
-```
-
-### 3. 运行推理应用（RK3588 开发板）
+推理应用（GUI）运行在 RK3588 开发板上，用于实时检测：
 
 ```bash
 cd TBJU_edge_inference_app
@@ -111,18 +97,40 @@ python3 run_gui.py
 
 # 或使用含音频检测的启动脚本
 bash start_gui_with_audio.sh
+
+# 运行冒烟测试
+python run_smoke_test.py
 ```
 
-### 4. 启动远程看板
+### 3. Windows PC — 启动远程看板
+
+远程看板运行在 Windows PC 上，用于接收开发板上传的检测事件和数据：
 
 ```bash
 cd TBJU_edge_inference_app/tbju-dashboard
+
+# 安装依赖
 pip install -r requirements.txt
+
+# 启动看板服务
 python app.py
 # 访问 http://localhost:8000
 ```
 
-### 5. 训练模型（可选）
+**看板功能：**
+- Tab1：总览（KPI + 告警 + 远程控制 + 日志）
+- Tab2：检测（事件表格 + 操作）
+- Tab3：性能（CPU/内存/温度/推理耗时监控）
+
+**使用方式：**
+1. 在 PC 上启动看板服务
+2. 在开发板 GUI 中填写看板地址（如 `http://PC端IP:8000/api/events`）
+3. 勾选"启用上传"，点击"测试连接"
+4. 开发板检测到事件时自动上传到看板
+
+### 4. 训练模型（可选）
+
+如需重新训练模型，在 Windows PC 上运行训练管道：
 
 ```bash
 cd Carriage_training_pipeline
