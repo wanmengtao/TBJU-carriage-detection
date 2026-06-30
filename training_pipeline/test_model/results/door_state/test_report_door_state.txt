@@ -1,0 +1,18 @@
+============================================================
+door_state 异物检测测试报告
+============================================================
+
+模型: D:\Carriage\YOLO_train\runs\door_state_detection\weights\best.pt
+数据集: D:\Carriage\datasets\test_output\door_state_detection_test\dataset.yaml
+
+整体指标:
+  mAP50: 0.7620
+  mAP50-95: 0.3073
+  Precision: 0.8143
+  Recall: 0.8238
+  F1: 0.8190
+
+按类别指标:
+  region:
+    AP50: 0.7687
+    AP: 0.3080

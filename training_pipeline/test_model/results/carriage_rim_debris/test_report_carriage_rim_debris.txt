@@ -1,0 +1,21 @@
+============================================================
+carriage_rim_debris 异物检测测试报告
+============================================================
+
+模型: D:\Carriage\YOLO_train\runs\carriage_rim_debris_detection\weights\best.pt
+数据集: D:\Carriage\datasets\test_output\carriage_rim_debris_detection_test\dataset.yaml
+
+整体指标:
+  mAP50: 0.8826
+  mAP50-95: 0.4939
+  Precision: 0.9377
+  Recall: 0.9068
+  F1: 0.9220
+
+按类别指标:
+  region:
+    AP50: 0.9750
+    AP: 0.6792
+  debris:
+    AP50: 0.7994
+    AP: 0.3245

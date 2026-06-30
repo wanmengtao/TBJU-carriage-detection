@@ -1,0 +1,6 @@
+﻿0 TBJU_region
+1 carriage_rim_region
+2 carriage_rim_debris
+3 track_region
+4 track_intrusion_debris
+5 door_region

@@ -1,0 +1,34 @@
+============================================================
+统一检测模型测试报告
+============================================================
+
+模型: D:\Carriage\YOLO_train\run_merged\train\weights\best.pt
+数据集: D:\Carriage\datasets\merged_detection\dataset.yaml
+测试集: test
+
+整体指标:
+  mAP50: 0.9021
+  mAP50-95: 0.5927
+  Precision: 0.9288
+  Recall: 0.9027
+  F1: 0.9155
+
+按类别指标:
+  TBJU_region:
+    AP50: 0.9578
+    AP: 0.7704
+  carriage_rim_region:
+    AP50: 0.9740
+    AP: 0.6618
+  carriage_rim_debris:
+    AP50: 0.8344
+    AP: 0.3799
+  track_region:
+    AP50: 0.9950
+    AP: 0.9873
+  track_intrusion_debris:
+    AP50: 0.8340
+    AP: 0.4241
+  door_region:
+    AP50: 0.8174
+    AP: 0.3362

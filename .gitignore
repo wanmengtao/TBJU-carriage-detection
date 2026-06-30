@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Datasets (too large)
+training_pipeline/datasets/
+
+# Training outputs
+training_pipeline/YOLO_train/runs/
+training_pipeline/OCR_train/output/
+*.pt
+*.onnx
+*.rknn
+
+# Model files (manage separately)
+models/
+
+# Output logs
+output/
+*.log
+
+# Claude Code
+.claude/
+
+# Playwright
+.playwright-mcp/
+
+# pytest cache
+.pytest_cache/

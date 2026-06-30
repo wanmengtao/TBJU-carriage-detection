@@ -1,0 +1,54 @@
+{
+  "serial": {
+    "port_linux": "/dev/ttyS9",
+    "port_windows": "COM3",
+    "baudrate": 9600,
+    "timeout_s": 0.2,
+    "read_size": 64
+  },
+  "protocol": {
+    "ignore_syn6288_tts": true
+  },
+  "commands": {
+    "open_camera": {
+      "label": "打开摄像头",
+      "matches": ["打开摄像头", "camera", "hex:01"]
+    },
+    "start_detection": {
+      "label": "开始/继续检测",
+      "matches": ["开始检测", "继续检测", "启动检测", "开始", "继续", "start", "resume", "hex:04"]
+    },
+    "stop_detection": {
+      "label": "停止检测",
+      "matches": ["停止检测", "关闭检测", "停止", "stop", "hex:02"]
+    },
+    "pause_detection": {
+      "label": "暂停检测",
+      "matches": ["暂停检测", "暂停", "pause", "hex:03"]
+    },
+    "start_capacity": {
+      "label": "开始评估",
+      "matches": ["开始评估", "开始压测", "性能评估", "扩展评估", "capacity", "hex:05"]
+    },
+    "stop_capacity": {
+      "label": "停止评估",
+      "matches": ["停止评估", "停止压测", "hex:06"]
+    },
+    "toggle_recording": {
+      "label": "开始/停止录制",
+      "matches": ["开始录制", "停止录制", "录制", "record", "hex:07"]
+    },
+    "show_status": {
+      "label": "系统状态",
+      "matches": ["系统状态", "当前状态", "状态", "status", "hex:08"]
+    },
+    "mute_alarm": {
+      "label": "静音报警",
+      "matches": ["静音", "静音报警", "mute", "hex:09"]
+    },
+    "unmute_alarm": {
+      "label": "解除静音",
+      "matches": ["解除静音", "取消静音", "unmute", "hex:0a"]
+    }
+  }
+}

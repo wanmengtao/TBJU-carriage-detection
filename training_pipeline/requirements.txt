@@ -1,0 +1,17 @@
+# YOLO 训练依赖
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+pyyaml>=6.0
+
+# OCR 训练依赖 (PP-OCR Rec)
+# torch 和 torchvision 需要单独安装 GPU 版：
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+# torch>=2.0.0
+# torchvision>=0.15.0
+pillow>=10.0.0
+
+# 通用依赖
+numpy>=1.24.0
+
+# RKNN 导出依赖 (可选)
+# rknn-toolkit2  # 需要从 airockchip 安装

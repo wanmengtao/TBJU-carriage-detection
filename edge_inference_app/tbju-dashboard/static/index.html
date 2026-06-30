@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TBJU 轨道异物智能检测远程看板</title>
+    <link rel="stylesheet" href="/static/style.css?v=20260616-v9">
+</head>
+<body>
+    <!-- 顶部状态栏 -->
+    <header class="status-bar">
+        <div class="status-left">
+            <h1 class="system-title">
+                <span class="icon">🔍</span>
+                TBJU 远程看板
+            </h1>
+        </div>
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="overview">总览</button>
+            <button class="tab-btn" data-tab="detection">检测</button>
+            <button class="tab-btn" data-tab="performance">性能</button>
+        </nav>
+        <div class="status-right">
+            <div class="status-item">
+                <span class="status-label">设备</span>
+                <span class="status-value" id="deviceStatus">
+                    <span class="dot"></span> <span id="deviceStatusText">等待连接</span>
+                </span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">时间</span>
+                <span class="status-value" id="currentTime">--:--:--</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tab 1: 总览 -->
+    <main class="dashboard">
+        <section class="tab-content active" id="tab-overview">
+            <!-- KPI 卡片 -->
+            <div class="kpi-row kpi-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon">📊</div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="kpiTotalEvents">0</div>
+                        <div class="kpi-label">今日事件</div>
+                    </div>
+                </div>
+                <div class="kpi-card danger">
+                    <div class="kpi-icon">⚠️</div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="kpiDebrisAlarm">0</div>
+                        <div class="kpi-label">异物告警</div>
+                    </div>
+                </div>
+                <div class="kpi-card info">
+                    <div class="kpi-icon">🔤</div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="kpiOcrRecord">0</div>
+                        <div class="kpi-label">OCR 记录</div>
+                    </div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-icon">🌡️</div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="kpiSystemAlarm">0</div>
+                        <div class="kpi-label">系统告警</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 告警区 -->
+            <div class="alert-section" id="alertSection" style="display: none;">
+                <div class="section-header">
+                    <h2>🚨 最新告警</h2>
+                    <span class="alert-time" id="alertTime"></span>
+                </div>
+                <div class="alert-content" id="alertContent"></div>
+            </div>
+
+            <!-- 远程控制面板 -->
+            <div class="rc-panel">
+                <div class="rc-panel-header">🎮 远程控制</div>
+                <div class="rc-compact">
+                    <div class="rc-btn-row">
+                        <button class="rc-btn" onclick="sendCommand('open_camera')">📷 摄像头</button>
+                        <button class="rc-btn rc-btn-start" onclick="sendCommand('start_detection')">▶ 开始</button>
+                        <button class="rc-btn rc-btn-warn" onclick="sendCommand('pause_detection')">⏸ 暂停</button>
+                        <button class="rc-btn rc-btn-stop" onclick="sendCommand('stop_detection')">⏹ 停止</button>
+                        <button class="rc-btn rc-btn-start" onclick="sendCommand('toggle_recording')">⏺ 录制</button>
+                        <button class="rc-btn rc-btn-stop" onclick="sendCommand('stop_recording')">⏹ 停录</button>
+                        <button class="rc-btn" onclick="sendCommand('mute_alarm')">🔇</button>
+                        <button class="rc-btn" onclick="sendCommand('unmute_alarm')">🔊</button>
+                    </div>
+                    <div class="rc-params">
+                        <label>置信度 <span id="confValue">0.45</span></label>
+                        <input type="range" id="rcConfidence" min="0.1" max="0.95" step="0.05" value="0.45">
+                        <label>IoU <span id="iouValue">0.50</span></label>
+                        <input type="range" id="rcIou" min="0.1" max="0.9" step="0.05" value="0.50">
+                        <label>帧间隔 <span id="frameIntValue">3</span></label>
+                        <input type="range" id="rcFrameInterval" min="1" max="10" step="1" value="3">
+                        <button class="rc-btn rc-btn-param" onclick="sendParams()">应用参数</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日志 & 命令历史 -->
+            <div class="log-panel">
+                <div class="log-history-row">
+                    <div class="log-col">
+                        <h4>📝 日志 <button class="rc-btn-small" onclick="refreshLogs()">🔄</button></h4>
+                        <div class="rc-log-list" id="rcLogList"><p class="rc-empty">暂无日志</p></div>
+                    </div>
+                    <div class="log-col">
+                        <h4>📋 命令历史 <button class="rc-btn-small" onclick="refreshHistory()">🔄</button></h4>
+                        <div class="rc-history-list" id="rcHistoryList"><p class="rc-empty">暂无命令记录</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 两栏：最近事件 + 设备状态 -->
+            <div class="overview-row">
+                <div class="overview-events">
+                    <div class="section-header">
+                        <h2>📋 最近事件</h2>
+                        <button class="btn btn-sm" onclick="switchTab('detection')">查看全部 →</button>
+                    </div>
+                    <div class="recent-events-list" id="recentEventsList">
+                        <p class="empty-hint">暂无事件</p>
+                    </div>
+                </div>
+                <div class="overview-status">
+                    <div class="section-header"><h2>📡 设备状态</h2></div>
+                    <div class="device-card">
+                        <div class="device-row">
+                            <span class="device-label">设备</span>
+                            <span class="device-value" id="ovDeviceId">ELF2-TBJU-01</span>
+                        </div>
+                        <div class="device-row">
+                            <span class="device-label">板端 IP</span>
+                            <span class="device-value mono" id="ovBoardIp">--</span>
+                        </div>
+                        <div class="device-row">
+                            <span class="device-label">最后事件</span>
+                            <span class="device-value mono" id="ovLastEvent">--</span>
+                        </div>
+                        <div class="device-row">
+                            <span class="device-label">上传链路</span>
+                            <span class="device-value" id="ovLinkStatus"><span class="dot offline-dot"></span> 未知</span>
+                        </div>
+                        <div class="device-divider"></div>
+                        <div class="device-metrics">
+                            <div class="device-metric">
+                                <div class="dm-value" id="ovCpu">--</div>
+                                <div class="dm-label">CPU</div>
+                            </div>
+                            <div class="device-metric">
+                                <div class="dm-value" id="ovMem">--</div>
+                                <div class="dm-label">内存</div>
+                            </div>
+                            <div class="device-metric">
+                                <div class="dm-value" id="ovTemp">--</div>
+                                <div class="dm-label">温度</div>
+                            </div>
+                            <div class="device-metric">
+                                <div class="dm-value" id="ovGpu">--</div>
+                                <div class="dm-label">GPU</div>
+                            </div>
+                            <div class="device-metric">
+                                <div class="dm-value" id="ovBw">--</div>
+                                <div class="dm-label">带宽</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: 检测 -->
+        <section class="tab-content" id="tab-detection">
+            <!-- 同步文件列表 -->
+            <div class="synced-files-section">
+                <div class="section-header">
+                    <h2>📁 同步文件（开发板 CSV）</h2>
+                    <div class="filter-bar">
+                        <button class="btn btn-sm" onclick="refreshSyncedFiles()">🔄 刷新</button>
+                        <button class="btn btn-sm" onclick="openOutputDir()">📂 打开目录</button>
+                    </div>
+                </div>
+                <div class="synced-files-list" id="syncedFilesList">
+                    <p class="empty-hint">暂无同步文件，检测完成后 CSV 文件会自动同步到此</p>
+                </div>
+            </div>
+
+            <!-- 事件列表 -->
+            <div class="event-list-section">
+                <div class="section-header">
+                    <h2>📋 事件列表</h2>
+                    <div class="filter-bar">
+                        <select id="eventTypeFilter" class="filter-select">
+                            <option value="">全部类型</option>
+                            <option value="debris_alarm">异物告警</option>
+                            <option value="ocr_record">OCR 记录</option>
+                            <option value="system_alarm">系统告警</option>
+                            <option value="network_test">测试事件</option>
+                            <option value="system_metric">性能指标</option>
+                        </select>
+                        <button class="btn btn-sm" onclick="refreshEvents()">🔄 刷新</button>
+                        <button class="btn btn-sm" onclick="exportCSV()">📥 导出</button>
+                        <button class="btn btn-sm" onclick="clearFilters()">🧹 清空</button>
+                    </div>
+                </div>
+                <div class="event-table-container">
+                    <table class="event-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>等级</th>
+                                <th>类型</th>
+                                <th>OCR</th>
+                                <th>FPS</th>
+                                <th>温度</th>
+                                <th>缩略图</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="event-empty" id="eventEmpty">
+                    <div class="empty-icon">📭</div>
+                    <div class="empty-text">暂无事件数据</div>
+                    <div class="empty-hint">等待板端上传事件...</div>
+                </div>
+            </div>
+
+            <!-- 操作栏 -->
+            <div class="action-bar">
+                <button class="btn btn-info" onclick="sendTestEvent()">🧪 测试事件</button>
+                <button class="btn btn-danger" onclick="deleteTestEvents()">🗑️ 清除测试</button>
+                <button class="btn btn-danger" onclick="deleteAllEvents()">⚠️ 清除全部</button>
+            </div>
+        </section>
+
+        <!-- Tab 3: 性能 -->
+        <section class="tab-content" id="tab-performance">
+            <!-- 数值卡片 -->
+            <div class="kpi-row kpi-5">
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="pfCpu">--</div>
+                        <div class="kpi-label">CPU</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="pfMem">--</div>
+                        <div class="kpi-label">内存</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="pfTemp">--</div>
+                        <div class="kpi-label">温度</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="pfTiming">--</div>
+                        <div class="kpi-label">推理耗时</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="pfBw">--</div>
+                        <div class="kpi-label">带宽</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图表 2x2 -->
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <div class="chart-title">CPU / 内存 %</div>
+                    <canvas id="cpuMemChart" width="800" height="300"></canvas>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-title">温度 °C</div>
+                    <canvas id="tempChart" width="800" height="300"></canvas>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-title">推理耗时 ms</div>
+                    <canvas id="timingChart" width="800" height="300"></canvas>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-title">接收带宽 KB/s（开发板 → PC）</div>
+                    <canvas id="bandwidthChart" width="800" height="300"></canvas>
+                    <div class="bw-stats" id="bwStats">当前: -- | 峰值: -- | 累计: --</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 事件详情模态框 -->
+    <div class="modal-overlay" id="eventModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📄 事件详情</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/static/script.js?v=20260616-v9"></script>
+</body>
+</html>

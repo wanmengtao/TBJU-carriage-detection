@@ -1,0 +1,8 @@
+metric,value
+mAP50,0.7620
+mAP50-95,0.3073
+Precision,0.8143
+Recall,0.8238
+F1,0.8190
+region_AP50,0.7687
+region_AP,0.3080

@@ -1,0 +1,10 @@
+metric,value
+mAP50,0.9196
+mAP50-95,0.6990
+Precision,0.9006
+Recall,0.9177
+F1,0.9091
+region_AP50,0.9950
+region_AP,0.9707
+debris_AP50,0.8421
+debris_AP,0.4340
