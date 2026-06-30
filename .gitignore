@@ -24,9 +24,11 @@ Carriage_training_pipeline/datasets/
 # Training outputs
 Carriage_training_pipeline/runs/
 Carriage_training_pipeline/YOLO_train/runs/
-Carriage_training_pipeline/OCR_train/output/
 *.pt
 *.onnx
+
+# OCR model output (include - small size)
+!Carriage_training_pipeline/OCR_train/output/
 
 # Database files
 *.db

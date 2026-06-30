@@ -21,16 +21,22 @@
 
 ---
 
-## ⚠️ 数据集说明
+## ⚠️ 数据集与模型说明
 
-**数据集文件较大（~3.3GB），不包含在本仓库中。**
+**数据集和 YOLO 模型文件较大，不包含在本仓库中。**
 
-| 目录 | 大小 | 说明 |
+| 内容 | 大小 | 说明 |
 |------|------|------|
 | `raw_data/` | ~1.1GB | 原始数据（图片 + Label Studio 标注 JSON） |
 | `datasets/` | ~2.2GB | 转换后的数据集（YOLO 训练用） |
+| YOLO 模型 | ~68MB | 训练好的 YOLO 检测模型 |
 
-**如需获取数据集，请联系：** [待添加邮箱]
+**百度网盘下载：**
+- 链接：https://pan.baidu.com/s/1U6slzn5Ij__8QQvn9hsJyA
+- 提取码：`nqhr`
+- 包含：`datasets_yolomodel.rar`（datasets 数据集 + YOLO 训练好的模型）
+
+**OCR 模型：** 包含在本仓库的 `OCR_train/output/` 目录中（文件较小）。
 
 ---
 
