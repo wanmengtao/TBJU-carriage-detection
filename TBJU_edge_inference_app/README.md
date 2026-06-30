@@ -78,9 +78,15 @@ TBJU_edge_inference_app/
 │   ├── smoke_core.py             # 推理核心冒烟测试
 │   └── test_core.py              # pytest 单元测试（27 项）
 │
-├── tools/                        # 工具
-│   ├── rknn_toolkit_lite2-*.whl  # RKNN Lite2 安装包
-│   └── pyqt5_wheels/             # PyQt5 离线 wheel
+├── tools/                        # 工具（RK3588 板端离线安装包）
+│   ├── rknn_toolkit_lite2-2.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+│   │                             # RKNN Lite2 安装包 (559KB, aarch64)
+│   └── pyqt5_wheels/             # PyQt5 离线安装包（RK3588 板端专用）
+│       ├── install_pyqt5.sh      #   安装脚本
+│       ├── python3-pyqt5_5.15.6_arm64.deb
+│       ├── python3-pyqt5-sip_12.9.1_arm64.deb
+│       ├── python3-sip_4.19.25_arm64.deb
+│       └── python3-sip-dev_4.19.25_arm64.deb
 │
 ├── assets/                       # 资源文件
 │   └── audio/                    # 声音报警音频
