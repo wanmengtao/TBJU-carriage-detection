@@ -58,7 +58,7 @@ results/
 | `end_to_end_details.csv` | YOLO 检测框 + OCR 识别文本 vs 真实标注 |
 | `runs/detect/val-N/` | ultralytics 验证输出（PR 曲线、混淆矩阵、batch 可视化） |
 
-## 异物/车门测试结果说明（待生成）
+## 异物/车门测试结果说明
 
 | 文件 | 内容 |
 |------|------|
