@@ -1,0 +1,24 @@
+# TBJU Edge Inference App - Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core dependencies (both Windows and RK3588)
+opencv-python>=4.8.0
+numpy>=1.24.0
+PyQt5>=5.15.0
+psutil>=5.9.0
+
+# Windows only (PC inference)
+# Uncomment these for Windows PC:
+# ultralytics>=8.0.0
+# torch>=2.0.0
+# onnxruntime>=1.16.0
+
+# RK3588 only (edge device)
+# Install separately on RK3588:
+# pip install tools/rknn_toolkit_lite2-2.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+# pyserial>=3.5
+
+# Dashboard (install separately in tbju-dashboard/):
+# fastapi>=0.109.0
+# uvicorn>=0.27.0
+# python-multipart>=0.0.6
