@@ -22,11 +22,15 @@ Thumbs.db
 training_pipeline/datasets/
 
 # Training outputs
+training_pipeline/runs/
 training_pipeline/YOLO_train/runs/
 training_pipeline/OCR_train/output/
 *.pt
 *.onnx
 *.rknn
+
+# Database files
+*.db
 
 # Model files (manage separately)
 models/
