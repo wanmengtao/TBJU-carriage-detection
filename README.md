@@ -310,6 +310,26 @@ fastapi, uvicorn, python-multipart
 
 ---
 
+## 📥 数据集与模型下载
+
+数据集和训练好的 YOLO 模型文件较大，通过百度网盘分享：
+
+| 内容 | 大小 | 说明 |
+|------|------|------|
+| datasets | ~2.2GB | 转换后的数据集（YOLO 训练用） |
+| YOLO 模型 | ~3.5GB | 训练好的 YOLO 检测模型（所有任务） |
+
+**百度网盘下载：**
+- 链接：https://pan.baidu.com/s/1U6slzn5Ij__8QQvn9hsJyA
+- 提取码：`nqhr`
+- 文件：`datasets_yolomodel.rar`
+
+**OCR 模型：** 包含在本仓库的 `Carriage_training_pipeline/OCR_train/output/` 目录中（~20MB）。
+
+**RKNN 模型：** 包含在本仓库的 `TBJU_edge_inference_app/models/` 目录中（~68MB）。
+
+---
+
 ## 📝 开发日志
 
 - 2026-06-30：初始版本发布
