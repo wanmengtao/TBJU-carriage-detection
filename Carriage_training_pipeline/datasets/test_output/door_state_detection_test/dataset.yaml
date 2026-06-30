@@ -1,0 +1,7 @@
+path: D:\Carriage\datasets\test_output\door_state_detection_test
+train: images
+val: images
+test: images
+
+nc: 1
+names: ['region']

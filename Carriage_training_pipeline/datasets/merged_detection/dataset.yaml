@@ -1,0 +1,7 @@
+path: C:\Users\LENOVO\Desktop\Carriage\datasets\merged_detection
+train: train/images
+val: val/images
+test: test/images
+
+nc: 6
+names: ['TBJU_region', 'carriage_rim_region', 'carriage_rim_debris', 'track_region', 'track_intrusion_debris', 'door_region']
