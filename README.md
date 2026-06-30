@@ -329,7 +329,9 @@ fastapi, uvicorn, python-multipart
 
 ## 📄 许可证
 
-[待定]
+本项目采用 [MIT 许可证](LICENSE) 开源。
+
+Copyright (c) 2026 wanmengtao
 
 ---
 
