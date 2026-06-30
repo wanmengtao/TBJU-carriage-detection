@@ -29,14 +29,14 @@
 |------|------|------|
 | `raw_data/` | ~1.1GB | 原始数据（图片 + Label Studio 标注 JSON） |
 | `datasets/` | ~2.2GB | 转换后的数据集（YOLO 训练用） |
-| YOLO 模型 | ~68MB | 训练好的 YOLO 检测模型 |
+| YOLO 模型 | ~3.5GB | 训练好的 YOLO 检测模型（所有任务） |
 
 **百度网盘下载：**
 - 链接：https://pan.baidu.com/s/1U6slzn5Ij__8QQvn9hsJyA
 - 提取码：`nqhr`
 - 包含：`datasets_yolomodel.rar`（datasets 数据集 + YOLO 训练好的模型）
 
-**OCR 模型：** 包含在本仓库的 `OCR_train/output/` 目录中（文件较小）。
+**OCR 模型：** 包含在本仓库的 `OCR_train/output/` 目录中（~20MB）。
 
 ---
 

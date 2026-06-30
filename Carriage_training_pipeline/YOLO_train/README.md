@@ -4,6 +4,11 @@
 
 使用 ultralytics YOLOv8 进行目标检测训练，支持 RKNN 格式导出（RK3588 部署）。
 
+**训练好的 YOLO 模型（~3.5GB）可通过百度网盘下载：**
+- 链接：https://pan.baidu.com/s/1U6slzn5Ij__8QQvn9hsJyA
+- 提取码：`nqhr`
+- 包含：`datasets_yolomodel.rar`（datasets 数据集 + YOLO 训练好的模型）
+
 包含三类训练脚本：
 
 | 脚本 | 任务 | 类别 |
