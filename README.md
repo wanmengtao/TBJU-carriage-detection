@@ -341,8 +341,8 @@ fastapi, uvicorn, python-multipart
 
 ## 🤝 致谢
 
-- YOLOv8：[ultralytics](https://github.com/ultralytics/ultralytics)
-- PP-OCR：[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
+- YOLOv8：[Ultralytics](https://github.com/ultralytics/ultralytics)
+- PP-OCR：[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) — 百度飞桨（PaddlePaddle）
 - Label Studio：[HumanSignal](https://github.com/HumanSignal/label-studio)
 
 ---
