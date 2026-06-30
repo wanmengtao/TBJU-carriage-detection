@@ -230,7 +230,7 @@ STC11L08XE
 Windows 串口助手确认能收到 `01/02/03` 后，再接回 ELF2/RK3588：
 
 ```bash
-cd ~/RKNN_deploy_app_T
+cd ~/TBJU_edge_inference_app
 python3 scripts/voice_ld3320_test.py --port /dev/ttyUSB0 --baudrate 9600
 ```
 

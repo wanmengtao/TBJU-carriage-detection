@@ -16,7 +16,7 @@ python -c "import serial; print('pyserial OK')"
 ## 启动命令
 
 ```bash
-cd RKNN_deploy_app_T
+cd TBJU_edge_inference_app
 
 # 标准启动（PyQt5，自动回退 tkinter）
 python run_gui.py

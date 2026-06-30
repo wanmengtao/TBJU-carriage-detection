@@ -3,15 +3,15 @@
 ## 1. 上传文件到板端
 
 ```bash
-scp -r /path/to/RKNN_deploy_app_T/ elf@<板端IP>:/home/elf/RKNN_deploy_app_T/
+scp -r /path/to/TBJU_edge_inference_app/ elf@<板端IP>:/home/elf/TBJU_edge_inference_app/
 ```
 
-板端目标目录: `/home/elf/RKNN_deploy_app_T/`
+板端目标目录: `/home/elf/TBJU_edge_inference_app/`
 
 必须文件:
 
 ```
-/home/elf/RKNN_deploy_app_T/
+/home/elf/TBJU_edge_inference_app/
 ├── run_gui.py
 ├── run_smoke_test.py
 ├── start_gui_with_audio.sh
@@ -35,7 +35,7 @@ scp -r /path/to/RKNN_deploy_app_T/ elf@<板端IP>:/home/elf/RKNN_deploy_app_T/
 ## 2. 安装依赖
 
 ```bash
-cd /home/elf/RKNN_deploy_app_T
+cd /home/elf/TBJU_edge_inference_app
 
 # RKNN Lite2
 pip install tools/rknn_toolkit_lite2-2.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
