@@ -218,25 +218,63 @@ PC 端 output/ 目录结构（与开发板一致）：
 ## 7. 安全特性
 
 - `torch.load(weights_only=True)` 防 pickle 反序列化
-- `TBJURKNNEngine._infer_lock` 推理锁防并发
+- `TBJURKNNEngine._infer_lock` 推理锁（infer_frame / close / reset / load 全部在锁内）
 - `EventUploader` 显式 `start()` + 200MB 磁盘限额
 - `safe_csv_cell()` 防 CSV 注入
 - 看板 `/api/files/download` 路径穿越防护
 - SQLite `BEGIN IMMEDIATE` + `busy_timeout=5000`
 - 语音报警队列 `maxsize=50`
 - 命令 ack 基于回调真实返回值
+- 后端 `load()` 失败自动释放已加载资源（try/except → close）
+- RKNN `_create_runner()` 局部对象失败时 release
 
 ---
 
 ## 8. 测试
 
 ```bash
-# pytest 单元测试（27 项）
+# pytest 单元测试（67 项）
 python tests/test_core.py
 
 # 冒烟测试（4 项）
 python run_smoke_test.py
 ```
+
+---
+
+## 9. 核心算法：区域约束 + 短时多帧确认
+
+推理后处理流程：
+
+```text
+YOLO 推理 → decode_yolov8()
+         → validate_debris_region()     ← 区域验证（不改类别）
+         → OCR（车号区域）
+         → TemporalConsistencyFilter    ← 滑动窗口内命中 M 次确认
+             .update_and_filter()
+         → draw_detections()
+```
+
+### 区域验证 `validate_debris_region()`
+
+- 异物落在对应区域内 → 通过（保留原始类别）
+- 对应区域未检测到 → 通过（保守放行，避免漏报）
+- 对应区域检测到但异物不在其中 → 过滤（背景误报）
+- 按类名解析映射（`DEBRIS_REGION_NAMES`），不依赖固定类别 ID
+
+### 时序一致性 `TemporalConsistencyFilter`
+
+- 滑动窗口 5 帧，至少出现 3 次才确认告警
+- 按 `source` 隔离历史（多路视频互不干扰）
+- 贪心一对一匹配（同一历史框不会被多个当前框重复匹配）
+- 匹配阈值按框对角线比例计算（适配不同分辨率），设有最小像素下限
+- 每帧都推进历史（包括空帧），确保旧检测被滑出窗口
+
+### 类名校验
+
+- `load_classes()` 支持乱序显式 ID，校验重复 ID、缺号、格式混用、重复类名
+- `resolve_class_ids()` 启动时校验所有必需类别存在
+- `tbju_class_id` 按名称解析，不依赖默认值 0
 
 ---
 
