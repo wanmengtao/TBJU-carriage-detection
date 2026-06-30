@@ -74,27 +74,39 @@ CTC Decode → "TBJU6970527"
 
 字符集: `0123456789BCJTU` (15字符) + CTC blank = 16 类
 
+## 文件结构
+
+```
+OCR_train/
+├── train_ocr.py           # 主训练脚本
+├── ocr_model.py           # PP-OCR Rec 模型定义
+├── test_training.py       # 训练结果快速验证
+├── ppocr_keys_v1.txt      # 字符字典 (15字符)
+├── output/                # 训练产物
+│   └── ppocr_rec_carriage_number/
+│       ├── best_model.pth         # 最佳模型
+│       ├── latest_model.pth       # 最新模型
+│       ├── ppocr_keys_v1.txt      # 字符字典副本
+│       ├── training_log.json      # 训练日志
+│       ├── evaluation_results.csv # 评估结果
+│       ├── ppocr_rec_tbju.onnx   # ONNX 模型
+│       └── 训练日志.txt            # 可读训练日志
+└── README.md
+```
+
 ## 输出说明
 
 训练完成后会在以下位置生成文件：
 
 ```
-wagon_number_ocr_merged/
-├── train/
-│   ├── crops/           # 训练 crop 图片
-│   └── labels.csv       # 训练标签
-├── val/
-│   ├── crops/           # 验证 crop 图片
-│   └── labels.csv       # 验证标签
-└── ...
-
-ppocr_rec_carriage_number/
-├── best_model.pth       # 最佳模型
-├── latest_model.pth     # 最新模型
-├── ppocr_keys_v1.txt    # 字符字典
-├── training_log.json    # 训练日志
+output/ppocr_rec_carriage_number/
+├── best_model.pth         # 最佳模型
+├── latest_model.pth       # 最新模型
+├── ppocr_keys_v1.txt      # 字符字典
+├── training_log.json      # 训练日志
 ├── evaluation_results.csv # 评估结果
-└── ppocr_rec_tbju.onnx  # ONNX 模型（如果使用 --export_onnx）
+├── ppocr_rec_tbju.onnx    # ONNX 模型（如果使用 --export_onnx）
+└── 训练日志.txt            # 可读训练日志
 ```
 
 ## 注意事项

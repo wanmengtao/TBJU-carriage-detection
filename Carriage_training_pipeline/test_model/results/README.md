@@ -15,11 +15,14 @@ results/
 │   ├── ocr_recognition_details.csv                #   OCR 每张 crop 识别结果
 │   ├── ocr_errors.csv                             #   OCR 识别错误样本
 │   ├── end_to_end_details.csv                     #   端到端测试详细结果
-│   └── runs/detect/val-N/                         #   YOLO 验证可视化
+│   └── runs/detect/val-N/                         #   YOLO 验证可视化（N 为运行编号）
 │       ├── BoxF1_curve.png                        #     F1 曲线
 │       ├── BoxPR_curve.png                        #     PR 曲线
+│       ├── BoxP_curve.png                         #     Precision 曲线
+│       ├── BoxR_curve.png                         #     Recall 曲线
 │       ├── confusion_matrix.png                   #     混淆矩阵
-│       └── val_batch*_labels/pred.jpg             #     验证 batch 对比
+│       ├── confusion_matrix_normalized.png        #     归一化混淆矩阵
+│       └── val_batch{0,1,2}_{labels,pred}.jpg     #     验证 batch 对比
 │
 ├── carriage_rim_debris/                           # 车厢沿异物测试
 │   ├── test_report_carriage_rim_debris.txt        #   测试报告

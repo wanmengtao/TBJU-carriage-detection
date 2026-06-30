@@ -13,6 +13,12 @@ test_model/
 ├── test_debris.py                      # 异物/车门模型测试（YOLO 检测）
 ├── test_merged.py                      # 统一模型测试（nc=6）
 ├── camera_infer.py                     # 摄像头实时推理（YOLO+OCR）
+├── results/                            # 测试结果输出目录
+│   ├── wagon_number/                   #   车号检测+识别测试
+│   ├── carriage_rim_debris/            #   车厢沿异物测试
+│   ├── track_intrusion/                #   轨道异物侵限测试
+│   ├── door_state/                     #   车门状态测试
+│   └── merged/                         #   统一模型测试
 └── README.md
 ```
 
