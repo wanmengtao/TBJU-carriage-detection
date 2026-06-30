@@ -42,49 +42,6 @@ Carriage_training_pipeline/
 ├── requirements.txt                       # Python 依赖
 ├── README.md                              # 本文件
 │
-├── raw_data/                              # 原始数据（图片 + Label Studio 标注 JSON）
-│   ├── eye_level/                         # 车号平视数据 (152 张)
-│   │   ├── train/{images,labels}/         #   Label Studio JSON 在 labels/ 下
-│   │   ├── val/{images,labels}/
-│   │   └── test/{images,labels}/
-│   ├── side_view/                         # 车号侧视数据 (215 张)
-│   │   ├── train/{images,labels}/
-│   │   ├── val/{images,labels}/
-│   │   └── test/{images,labels}/
-│   ├── carriage_rim_debris/               # 车厢沿异物数据 (468 张, 含扩充)
-│   │   ├── train/{images,labels}/
-│   │   ├── val/{images,labels}/
-│   │   └── test/images/
-│   ├── track_intrusion/                   # 轨道异物侵限数据 (698 张, 含扩充)
-│   │   ├── train/{images,labels}/
-│   │   ├── val/{images,labels}/
-│   │   └── test/images/
-│   ├── door_state/                        # 车门状态数据 (157 张)
-│   │   ├── train/{images,labels}/
-│   │   ├── val/{images,labels}/
-│   │   └── test/images/
-│   └── debris_materials/                  # 异物贴图素材 (透明背景 PNG)
-│       ├── rock/                          #   石头 (7 张)
-│       ├── bottle/                        #   水瓶 (9 张)
-│       └── coalslag/                      #   煤渣块 (5 张)
-│
-├── datasets/                              # 转换后的数据集（YOLO 训练用）
-│   ├── output/                            # train + val 数据
-│   │   ├── wagon_number_detection_平视/   #   nc=1, names=['TBJU_region']
-│   │   ├── wagon_number_detection_侧视/
-│   │   ├── wagon_number_ocr_平视/         #   OCR crops + labels.csv
-│   │   ├── wagon_number_ocr_侧视/
-│   │   ├── carriage_rim_debris_detection/ #   nc=2, names=['region','debris']
-│   │   ├── track_intrusion_detection/
-│   │   ├── door_state_detection/
-│   │   └── summary.txt
-│   └── test_output/                       # test 数据
-│       ├── wagon_number_detection_test/
-│       ├── wagon_number_ocr_test/
-│       ├── carriage_rim_debris_detection_test/
-│       ├── track_intrusion_detection_test/
-│       └── door_state_detection_test/
-│
 ├── scripts/                               # 数据处理脚本
 │   ├── convert_labelstudio_tbju.py        #   车号 JSON → YOLO + OCR 数据集
 │   ├── convert_labelstudio_new.py         #   异物/车门 JSON → YOLO txt
