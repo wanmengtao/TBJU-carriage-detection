@@ -11,7 +11,6 @@
 | `convert_labelstudio_tbju.py` | 车号数据转换 | Label Studio JSON | YOLO + OCR 数据集 |
 | `convert_labelstudio_new.py` | 异物/车门数据转换 | Label Studio JSON | YOLO txt 标签 |
 | `augment_debris.py` | 异物贴图扩充 | 原图 + 素材 | 扩充图 + JSON |
-| `augment_video_debris.py` | 视频帧异物扩充 | 视频文件 | 扩充图 + JSON |
 | `setup_new_datasets.py` | 同步图片到数据集 | raw_data/ | datasets/ |
 | `merge_datasets.py` | 合并数据集 | 4个任务数据集 | 统一数据集 (nc=6) |
 
@@ -110,21 +109,7 @@ python scripts/augment_debris.py \
 
 ---
 
-### 4. augment_video_debris.py — 视频帧异物扩充
-
-从视频中提取帧并进行异物扩充。
-
-```bash
-python scripts/augment_video_debris.py \
-    --video_path path/to/video.mp4 \
-    --output_dir raw_data/track_intrusion \
-    --debris_dir raw_data/debris_materials \
-    --class_name track_region
-```
-
----
-
-### 5. setup_new_datasets.py — 同步图片到数据集
+### 4. setup_new_datasets.py — 同步图片到数据集
 
 将 raw_data/ 中的图片（含扩充图）复制到 datasets/ 目录。
 
@@ -141,7 +126,7 @@ python scripts/setup_new_datasets.py
 
 ---
 
-### 6. merge_datasets.py — 合并数据集
+### 5. merge_datasets.py — 合并数据集
 
 将 4 个任务的数据集合并为统一训练集（nc=6）。
 
