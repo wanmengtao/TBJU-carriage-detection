@@ -1,7 +1,0 @@
-path: D:\Carriage\datasets\test_output\track_intrusion_detection_test
-train: images
-val: images
-test: images
-
-nc: 2
-names: ['region', 'debris']

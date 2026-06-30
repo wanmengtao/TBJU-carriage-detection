@@ -1,5 +1,0 @@
-path: D:\数据集标注\test_output\wagon_number_detection_test
-train: test/images
-val: test/images
-nc: 1
-names: ['TBJU_region']

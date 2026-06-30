@@ -1,7 +1,0 @@
-path: D:\Carriage\datasets\test_output\carriage_rim_debris_detection_test
-train: images
-val: images
-test: images
-
-nc: 2
-names: ['region', 'debris']

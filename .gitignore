@@ -19,12 +19,12 @@ env/
 Thumbs.db
 
 # Datasets (too large)
-training_pipeline/datasets/
+Carriage_training_pipeline/datasets/
 
 # Training outputs
-training_pipeline/runs/
-training_pipeline/YOLO_train/runs/
-training_pipeline/OCR_train/output/
+Carriage_training_pipeline/runs/
+Carriage_training_pipeline/YOLO_train/runs/
+Carriage_training_pipeline/OCR_train/output/
 *.pt
 *.onnx
 *.rknn
