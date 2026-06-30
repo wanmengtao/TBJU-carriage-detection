@@ -306,16 +306,7 @@ fastapi, uvicorn, python-multipart
 
 ## 🎬 演示视频和技术文档
 
-**演示视频：** [待添加]
-
-**技术文档：**
-- [训练管道说明](Carriage_training_pipeline/README.md)
-- [推理应用说明](TBJU_edge_inference_app/README.md)
-- [GUI 使用说明](TBJU_edge_inference_app/docs/README_GUI_DEMO.md)
-- [板端部署清单](TBJU_edge_inference_app/docs/BOARD_RUN_CHECKLIST.md)
-- [语音控制文档](TBJU_edge_inference_app/docs/LD3320_VOICE_CONTROL.md)
-- [数据集转换规范](Carriage_training_pipeline/docs/TBJU数据集转换规范.md)
-- [异物扩充方案](Carriage_training_pipeline/docs/异物数据扩充设计方案.md)
+[待添加]
 
 ---
 
