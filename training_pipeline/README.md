@@ -1,8 +1,10 @@
-# Carriage — 列车车厢检测与识别系统
+# Carriage_training_pipeline — 列车车厢检测模型训练管道
 
 ## 1. 项目概述
 
-基于深度学习的列车车厢视觉检测系统，部署目标为 RK3588（ELF2）开发板。
+基于深度学习的列车车厢视觉检测系统**训练管道**，负责数据处理、模型训练与测试验证。
+
+部署目标为 RK3588（ELF2）开发板，推理应用见 [TBJU_edge_inference_app](../TBJU_edge_inference_app/)。
 
 **包含 5 个子任务 + 1 个统一模型：**
 
@@ -22,7 +24,7 @@
 ## 2. 目录结构
 
 ```
-Carriage/
+Carriage_training_pipeline/
 ├── config.py                              # 全局路径配置（自动推导，无需修改）
 ├── requirements.txt                       # Python 依赖
 ├── README.md                              # 本文件
@@ -74,6 +76,7 @@ Carriage/
 │   ├── convert_labelstudio_tbju.py        #   车号 JSON → YOLO + OCR 数据集
 │   ├── convert_labelstudio_new.py         #   异物/车门 JSON → YOLO txt
 │   ├── augment_debris.py                  #   异物贴图扩充（生成 _aug 图 + JSON）
+│   ├── augment_video_debris.py            #   视频帧异物扩充
 │   ├── setup_new_datasets.py              #   同步图片到 datasets/（含扩充图）
 │   └── merge_datasets.py                  #   合并四任务数据集为统一训练集（nc=6）
 │
@@ -85,6 +88,7 @@ Carriage/
 ├── OCR_train/                             # OCR 训练脚本
 │   ├── train_ocr.py                       #   CRNN 训练
 │   ├── ocr_model.py                       #   模型定义 (MobileNetV3 + BiLSTM + CTC)
+│   ├── test_training.py                   #   训练测试脚本
 │   └── ppocr_keys_v1.txt                  #   字符字典 (0-9, B, C, J, T, U)
 │
 ├── test_model/                            # 测试脚本
@@ -92,7 +96,13 @@ Carriage/
 │   ├── test_debris.py                     #   异物/车门模型测试 (YOLO mAP)
 │   ├── test_merged.py                     #   统一模型测试 (nc=6)
 │   ├── camera_infer.py                    #   摄像头实时推理 (YOLO + OCR)
-│   └── convert_test_data_wagon_number.py  #   车号测试数据转换
+│   ├── convert_test_data_wagon_number.py  #   车号测试数据转换
+│   └── results/                           #   测试结果
+│       ├── wagon_number/                  #     车号测试报告
+│       ├── carriage_rim_debris/           #     车厢沿异物测试报告
+│       ├── track_intrusion/               #     轨道异物测试报告
+│       ├── door_state/                    #     车门状态测试报告
+│       └── merged/                        #     统一模型测试报告
 │
 └── docs/                                  # 项目文档
     ├── 项目目录结构说明.md
@@ -110,7 +120,7 @@ Carriage/
 `config.py` 使用 `Path(__file__).parent` 自动推导项目根目录，所有路径均为相对路径，换电脑无需修改。
 
 ```python
-PROJECT_ROOT = Path(__file__).parent.resolve()   # Carriage/
+PROJECT_ROOT = Path(__file__).parent.resolve()   # Carriage_training_pipeline/
 RAW_DATA_DIR  = PROJECT_ROOT / "raw_data"        # 原始数据
 DATASETS_DIR  = PROJECT_ROOT / "datasets"        # 转换后的数据集
 OUTPUT_DIR    = DATASETS_DIR / "output"          # train+val
@@ -211,8 +221,9 @@ test_model/results/door_state/test_report.txt
 | `convert_labelstudio_new.py` | raw_data/{3个异物任务} + Label Studio JSON | datasets/output/{3个任务}_detection/labels/*.txt | 异物/车门 JSON → YOLO txt |
 | `augment_debris.py` | raw_data/{task} + raw_data/debris_materials | raw_data/{task}/images/*_aug*.jpg + JSON | 异物贴图扩充（按分类基准尺寸，±10%浮动，Poisson分布控制数量） |
 | `setup_new_datasets.py` | raw_data/{3个异物任务} | datasets/output/{3个任务}_detection/images/ | 清空旧图，复制原图+扩充图 |
+| `merge_datasets.py` | datasets/output/{4个任务} | datasets/merged_detection/ | 合并四任务数据集（nc=6） |
 
-**运行顺序：** augment_debris.py → setup_new_datasets.py → convert_labelstudio_new.py
+**运行顺序：** augment_debris.py → setup_new_datasets.py → convert_labelstudio_new.py → merge_datasets.py
 
 ### 5.2 训练脚本 (YOLO_train/, OCR_train/)
 
@@ -222,6 +233,7 @@ test_model/results/door_state/test_report.txt
 | `train_yolo_debris.py --task carriage_rim_debris` | 车厢沿异物 (nc=2) | YOLO_train/runs/carriage_rim_debris_detection/weights/best.{pt,onnx} |
 | `train_yolo_debris.py --task track_intrusion` | 轨道异物侵限 (nc=2) | YOLO_train/runs/track_intrusion_detection/weights/best.{pt,onnx} |
 | `train_yolo_debris.py --task door_state` | 车门状态 (nc=1) | YOLO_train/runs/door_state_detection/weights/best.{pt,onnx} |
+| `train_yolo_merged.py` | 统一模型 (nc=6) | YOLO_train/runs/merged_detection/weights/best.{pt,onnx} |
 | `train_ocr.py` | 车号 OCR 识别 | OCR_train/output/ppocr_rec_carriage_number/best_model.pth |
 
 训练完成后自动导出 ONNX 模型（`--no_export` 可跳过）。
@@ -232,6 +244,7 @@ test_model/results/door_state/test_report.txt
 |------|------|------|
 | `test_wagon_number.py` | 车号 (YOLO+OCR+E2E) | mAP50, Precision, Recall, OCR Accuracy, E2E Accuracy |
 | `test_debris.py --task {task}` | 异物/车门 (YOLO) | mAP50, mAP50-95, Precision, Recall, F1, 按类别 AP50/AP |
+| `test_merged.py` | 统一模型 (nc=6) | mAP50, mAP50-95, Precision, Recall, F1, 按类别 AP50/AP |
 
 ---
 
@@ -281,6 +294,7 @@ test_model/results/door_state/test_report.txt
 | 车厢沿异物 | 2 | region | debris |
 | 轨道异物侵限 | 2 | region | debris |
 | 车门状态 | 1 | region | — |
+| 统一模型 | 6 | TBJU_region, region, debris (×4任务) | — |
 
 YOLO 标签格式（每行一个框）：
 ```
@@ -312,6 +326,7 @@ python YOLO_train/train_yolo_wagon_number.py --use_config
 python YOLO_train/train_yolo_debris.py --task carriage_rim_debris --use_config
 python YOLO_train/train_yolo_debris.py --task track_intrusion --use_config
 python YOLO_train/train_yolo_debris.py --task door_state --use_config
+python YOLO_train/train_yolo_merged.py --use_config
 python OCR_train/train_ocr.py --use_config
 
 # 5. 测试
@@ -319,9 +334,11 @@ python test_model/test_wagon_number.py --use_config --test_all
 python test_model/test_debris.py --task carriage_rim_debris --use_config
 python test_model/test_debris.py --task track_intrusion --use_config
 python test_model/test_debris.py --task door_state --use_config
+python test_model/test_merged.py --use_config
 
 # 6. 部署（ONNX → RKNN）
-# 将 best.onnx 拷贝到 RK3588 开发板，使用 rknn-toolkit2 转换
+# 将 best.onnx 拷贝到 TBJU_edge_inference_app/models/ 目录
+# 使用 rknn-toolkit2 转换为 .rknn 格式
 ```
 
 ---
@@ -339,7 +356,9 @@ YOLO_train/runs/
 │   └── weights/{best.pt, best.onnx, last.pt}
 ├── track_intrusion_detection/                   # 轨道异物 (nc=2)
 │   └── weights/{best.pt, best.onnx, last.pt}
-└── door_state_detection/                        # 车门状态 (nc=1)
+├── door_state_detection/                        # 车门状态 (nc=1)
+│   └── weights/{best.pt, best.onnx, last.pt}
+└── merged_detection/                            # 统一模型 (nc=6)
     └── weights/{best.pt, best.onnx, last.pt}
 
 OCR_train/output/
@@ -359,24 +378,29 @@ OCR_train/output/
 test_model/results/
 ├── README.md                                    # 本目录说明
 │
-├── wagon_number/                                # 车号检测+识别（已完成）
+├── wagon_number/                                # 车号检测+识别
 │   ├── test_report.txt                          #   汇总报告（YOLO+OCR+E2E）
 │   ├── ocr_recognition_details.csv              #   OCR 详细结果
 │   ├── ocr_errors.csv                           #   OCR 错误样本
 │   ├── end_to_end_details.csv                   #   端到端详细结果
 │   └── runs/detect/val-N/                       #   YOLO 验证可视化
 │
-├── carriage_rim_debris/                         # 车厢沿异物（待测试）
+├── carriage_rim_debris/                         # 车厢沿异物
 │   ├── test_report.txt
 │   ├── test_results.csv
 │   └── runs/detect/val-N/
 │
-├── track_intrusion/                             # 轨道异物（待测试）
+├── track_intrusion/                             # 轨道异物
 │   ├── test_report.txt
 │   ├── test_results.csv
 │   └── runs/detect/val-N/
 │
-└── door_state/                                  # 车门状态（待测试）
+├── door_state/                                  # 车门状态
+│   ├── test_report.txt
+│   ├── test_results.csv
+│   └── runs/detect/val-N/
+│
+└── merged/                                      # 统一模型
     ├── test_report.txt
     ├── test_results.csv
     └── runs/detect/val-N/
@@ -423,3 +447,10 @@ opencv-python    # 视频处理
 pyyaml           # YAML 配置
 numpy            # 数值计算
 ```
+
+---
+
+## 13. 相关项目
+
+- [TBJU_edge_inference_app](../TBJU_edge_inference_app/) — RK3588 边缘推理应用
+- [TBJU-carriage-detection](../../TBJU-carriage-detection/) — GitHub 仓库主页
