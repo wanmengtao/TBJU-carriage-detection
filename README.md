@@ -335,4 +335,4 @@ fastapi, uvicorn, python-multipart
 
 ## 📧 联系方式
 
-[待添加]
+- 邮箱：1535121687@qq.com
