@@ -27,13 +27,13 @@ Carriage_training_pipeline/YOLO_train/runs/
 Carriage_training_pipeline/OCR_train/output/
 *.pt
 *.onnx
-*.rknn
 
 # Database files
 *.db
 
-# Model files (manage separately)
-models/
+# Edge inference models (include for demo)
+!TBJU_edge_inference_app/models/
+!TBJU_edge_inference_app/models/**
 
 # Output logs
 output/

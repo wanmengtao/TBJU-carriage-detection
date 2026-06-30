@@ -2,16 +2,16 @@
 
 列车车厢视觉检测与识别系统，基于深度学习，部署目标为 RK3588（ELF2）开发板。
 
-## 项目概述
+## 🎯 项目亮点
 
-本项目包含两个子模块：
+- **统一检测模型**：YOLOv8 (nc=6) 一次推理完成 6 类检测
+- **双平台支持**：Windows PC 开发 + RK3588 嵌入式部署
+- **完整工作流**：数据标注 → 训练 → 测试 → 部署全链路
+- **智能交互**：GUI 界面 + 语音控制 + 声音报警 + 远程看板
 
-| 子目录 | 功能 | 运行环境 |
-|--------|------|----------|
-| `Carriage_training_pipeline/` | 模型训练管道（数据处理、训练、测试） | PC (Windows/Linux) |
-| `TBJU_edge_inference_app/` | 边缘推理应用（GUI、语音、报警、看板） | RK3588 / PC |
+---
 
-**检测任务：**
+## 📋 检测任务
 
 | 任务 | 模型 | 类别 | 说明 |
 |------|------|------|------|
@@ -20,13 +20,13 @@
 | 车厢沿异物 | YOLOv8 (nc=2) | region, debris | 检测车厢沿上的异物 |
 | 轨道异物侵限 | YOLOv8 (nc=2) | region, debris | 检测轨道区域内的异物 |
 | 车门状态 | YOLOv8 (nc=1) | region | 检测车门区域 |
-| 统一模型 | YOLOv8 (nc=6) | 6类 | 合并四任务 |
+| 统一模型 | YOLOv8 (nc=6) | 6类 | 合并四任务，一次推理完成所有检测 |
 
-**技术栈：** Python, YOLOv8, PyTorch, Label Studio, ONNX, rknn-toolkit2
+**技术栈：** Python, YOLOv8, PyTorch, Label Studio, ONNX, rknn-toolkit2, PyQt5, FastAPI
 
 ---
 
-## 目录结构
+## 📁 目录结构
 
 ```
 TBJU-carriage-detection/
@@ -44,32 +44,85 @@ TBJU-carriage-detection/
 │   └── docs/                          # 技术文档 (6个)
 │
 └── TBJU_edge_inference_app/           # 边缘推理应用
-    ├── run_gui.py                     # GUI 启动
+    ├── run_gui.py                     # GUI 启动入口
     ├── run_smoke_test.py              # 冒烟测试
     ├── watch_csv.py                   # CSV 监控
     ├── start_gui_with_audio.sh        # 板端启动脚本
     ├── requirements.txt               # Python 依赖
     ├── src/                           # 核心模块 (7个子模块)
-    │   ├── core/                      # 推理核心
-    │   ├── gui/                       # GUI 界面
+    │   ├── core/                      # 推理核心（RKNN/PyTorch/ONNX 三后端）
+    │   ├── gui/                       # GUI 界面（PyQt5/tkinter）
     │   ├── alarm/                     # 声音报警
-    │   ├── network/                   # 网络上传
-    │   ├── voice/                     # 语音控制
-    │   ├── monitor/                   # 系统监控
+    │   ├── network/                   # 事件上传 + 命令轮询
+    │   ├── voice/                     # LD3320 语音控制
+    │   ├── monitor/                   # 系统监控（CPU/GPU/NPU）
     │   └── capacity/                  # 压力测试
     ├── scripts/                       # CLI 脚本 (5个)
-    ├── tests/                         # 单元测试
+    ├── tests/                         # 单元测试 (27项)
     ├── config/                        # 配置文件
-    ├── tbju-dashboard/                # Web 看板
+    ├── models/                        # 预训练模型（RKNN 格式）
+    │   ├── yolo/                      # YOLO 检测模型
+    │   └── ocr/                       # OCR 识别模型
+    ├── tbju-dashboard/                # Web 看板（FastAPI）
     ├── assets/                        # 资源文件
     └── docs/                          # 部署文档 (5个)
 ```
 
 ---
 
-## 快速开始
+## 🚀 快速开始
 
-### 训练管道
+### 1. 克隆仓库
+
+```bash
+git clone https://github.com/wanmengtao/TBJU-carriage-detection.git
+cd TBJU-carriage-detection
+```
+
+### 2. 运行推理应用（Windows PC）
+
+```bash
+cd TBJU_edge_inference_app
+
+# 安装依赖
+pip install -r requirements.txt
+pip install ultralytics torch onnxruntime
+
+# 启动 GUI
+python run_gui.py
+
+# 或运行冒烟测试
+python run_smoke_test.py
+```
+
+### 3. 运行推理应用（RK3588 开发板）
+
+```bash
+cd TBJU_edge_inference_app
+
+# 安装依赖
+pip install -r requirements.txt
+pip install tools/rknn_toolkit_lite2-*.whl
+pip install pyserial
+
+# 启动 GUI
+export DISPLAY=:0.0
+python3 run_gui.py
+
+# 或使用含音频检测的启动脚本
+bash start_gui_with_audio.sh
+```
+
+### 4. 启动远程看板
+
+```bash
+cd TBJU_edge_inference_app/tbju-dashboard
+pip install -r requirements.txt
+python app.py
+# 访问 http://localhost:8000
+```
+
+### 5. 训练模型（可选）
 
 ```bash
 cd Carriage_training_pipeline
@@ -94,33 +147,72 @@ python test_model/test_wagon_number.py --use_config --test_all
 python test_model/test_merged.py --use_config
 ```
 
-### 边缘推理应用
+---
 
-```bash
-cd TBJU_edge_inference_app
+## 📦 模型文件
 
-# Windows
-pip install -r requirements.txt
-python run_gui.py
+本仓库包含预训练的 RKNN 模型文件，可直接在 RK3588 上运行：
 
-# RK3588
-pip install -r requirements.txt
-pip install tools/rknn_toolkit_lite2-*.whl
-export DISPLAY=:0.0
-python3 run_gui.py
+| 模型 | 文件 | 大小 | 说明 |
+|------|------|------|------|
+| YOLO 默认 | `models/yolo/merged_yolov8.rknn` | ~23MB | FP16 精度，推荐使用 |
+| YOLO FP16 | `models/yolo/merged_yolov8_fp.rknn` | ~23MB | FP16 备份 |
+| YOLO INT8 | `models/yolo/merged_yolov8_i8.rknn` | ~12MB | INT8 量化，速度优先 |
+| OCR 默认 | `models/ocr/rec_tbju.rknn` | ~4MB | FP16 精度 |
+| OCR FP16 | `models/ocr/rec_tbju_fp.rknn` | ~4MB | FP16 备份 |
 
-# 冒烟测试
-python run_smoke_test.py
-
-# 远程看板
-cd tbju-dashboard
-pip install -r requirements.txt
-python app.py
-```
+**模型说明：**
+- YOLO 模型：统一检测 6 类（车号区域 + 4个任务区域 + 异物）
+- OCR 模型：识别车号文本（15 字符：0-9, B, C, J, T, U）
+- 格式：RKNN（RK3588 NPU 专用格式）
 
 ---
 
-## 工作流程
+## 🎮 功能特性
+
+### GUI 三标签页
+
+| Tab | 功能 | 说明 |
+|-----|------|------|
+| Tab 1 | 检测识别 | 图片/视频/摄像头检测、语音控制、声音报警、事件上传 |
+| Tab 2 | 性能监控 | CPU/内存/温度/NPU/GPU 实时监控，历史曲线 |
+| Tab 3 | 扩展能力 | 1/2/4 ROI 压力测试，输出容量报告 |
+
+### 语音控制（LD3320）
+
+支持语音命令控制：
+- 打开摄像头、开始/停止/暂停检测
+- 开始/停止评估、开始/停止录制
+- 系统状态、静音/解除静音
+
+### 声音报警
+
+检测到异物或系统异常时，自动通过 USB 小音箱语音播报。
+
+### 远程看板
+
+FastAPI Web 应用，3 Tab 布局：
+- Tab1：总览（KPI + 告警 + 控制 + 日志）
+- Tab2：检测（事件表格 + 操作）
+- Tab3：性能（6 数值卡片 + 7 图表）
+
+---
+
+## 📊 测试指标
+
+| 指标 | 说明 | 期望值 |
+|------|------|--------|
+| mAP50 | IoU=0.5 平均精度 | >0.9 |
+| mAP50-95 | IoU=0.5:0.95 平均精度 | >0.7 |
+| Precision | 正确检测 / 总检测 | >0.9 |
+| Recall | 正确检测 / 总真实 | >0.9 |
+| F1 | Precision 和 Recall 调和平均 | >0.9 |
+| OCR Accuracy | 完全匹配率 | >0.95 |
+| E2E Accuracy | 检测+识别都正确 | >0.9 |
+
+---
+
+## 🔧 工作流程
 
 ```
 1. 数据准备
@@ -141,7 +233,7 @@ python app.py
 
 ---
 
-## 文档
+## 📚 文档
 
 | 文档 | 内容 |
 |------|------|
@@ -154,21 +246,7 @@ python app.py
 
 ---
 
-## 测试指标
-
-| 指标 | 说明 | 期望值 |
-|------|------|--------|
-| mAP50 | IoU=0.5 平均精度 | >0.9 |
-| mAP50-95 | IoU=0.5:0.95 平均精度 | >0.7 |
-| Precision | 正确检测 / 总检测 | >0.9 |
-| Recall | 正确检测 / 总真实 | >0.9 |
-| F1 | Precision 和 Recall 调和平均 | >0.9 |
-| OCR Accuracy | 完全匹配率 | >0.95 |
-| E2E Accuracy | 检测+识别都正确 | >0.9 |
-
----
-
-## 依赖
+## 💻 依赖
 
 ### 训练管道
 
@@ -199,6 +277,35 @@ fastapi, uvicorn, python-multipart
 
 ---
 
-## 许可证
+## 🎬 演示视频
+
+[待添加]
+
+---
+
+## 📝 开发日志
+
+- 2026-06-30：初始版本发布
+- 完成 5 个子任务 + 1 个统一模型
+- 支持 Windows PC + RK3588 双平台
+- 集成 GUI、语音控制、声音报警、远程看板
+
+---
+
+## 🤝 致谢
+
+- YOLOv8：[ultralytics](https://github.com/ultralytics/ultralytics)
+- PP-OCR：[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
+- Label Studio：[HumanSignal](https://github.com/HumanSignal/label-studio)
+
+---
+
+## 📄 许可证
 
 [待定]
+
+---
+
+## 📧 联系方式
+
+[待添加]
