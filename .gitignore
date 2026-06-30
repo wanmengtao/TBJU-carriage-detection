@@ -49,3 +49,8 @@ output/
 
 # pytest cache
 .pytest_cache/
+
+# Tools — 二进制包不入库，从 release 下载
+TBJU_edge_inference_app/tools/*.whl
+TBJU_edge_inference_app/tools/*.deb
+TBJU_edge_inference_app/tools/_tmp/

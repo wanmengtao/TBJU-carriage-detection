@@ -6,6 +6,7 @@ TBJU 轨道异物智能检测远程看板 - 主应用
 板端上传: http://电脑端IP:8000/api/events
 """
 import os
+import re
 import json
 import base64
 import csv
@@ -29,6 +30,15 @@ SYNCED_DIR = os.path.join(os.path.dirname(__file__), "uploads", "synced_files")
 # 自动保存到本地 output 目录（与开发板目录结构对齐）
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "output")
 device_status = {}  # 设备在线状态（内存存储）
+
+# 安全配置
+ADMIN_TOKEN = os.environ.get("TBJU_ADMIN_TOKEN", "tbju-demo-2026")  # 删除/管理接口鉴权
+ALLOWED_THUMBNAIL_FORMATS = {"jpg", "jpeg", "png"}
+MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024  # 2MB
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024    # 10MB 文件上传限制
+# 图片魔数
+MAGIC_JPEG = b'\xff\xd8\xff'
+MAGIC_PNG = b'\x89PNG'
 
 # 带宽统计（内存存储，滑动窗口 10 秒）
 import threading
@@ -81,10 +91,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS 中间件
+# CORS 中间件 — 局域网竞赛场景，允许本地和局域网访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # 竞赛演示场景，局域网内开放
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -98,13 +108,9 @@ from starlette.responses import Response as StarletteResponse
 
 class BandwidthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: StarletteRequest, call_next):
-        # 统计请求体大小（文件上传用 Content-Length，避免读两次）
+        # 统计请求体大小 — 统一用 Content-Length，避免读完整 body
         content_length = request.headers.get("content-length")
-        if "/api/files/upload" in str(request.url):
-            req_bytes = int(content_length) if content_length else 0
-        else:
-            body = await request.body()
-            req_bytes = len(body)
+        req_bytes = int(content_length) if content_length else 0
         now = _time.time()
         with _bw_lock:
             global _bw_total_bytes, _bw_peak_bps
@@ -182,27 +188,42 @@ async def receive_event(request: Request):
     thumbnail_data = event_data.get("thumbnail")
     if thumbnail_data and isinstance(thumbnail_data, dict):
         try:
-            # 解码 base64 图片
             img_base64 = thumbnail_data.get("data", "")
             if img_base64:
-                # 生成文件名
-                event_id = event_data.get("event_id", f"evt-{int(datetime.now().timestamp()*1000)}")
-                fmt = thumbnail_data.get("format", "jpg")
-                today = datetime.now().strftime("%Y%m%d")
-                day_dir = os.path.join(UPLOAD_DIR, today)
-                os.makedirs(day_dir, exist_ok=True)
+                # 1) event_id 清洗：只保留安全字符
+                raw_id = event_data.get("event_id", f"evt-{int(datetime.now().timestamp()*1000)}")
+                safe_id = re.sub(r'[^\w\-]', '_', str(raw_id))[:64]
 
-                filename = f"{event_id}.{fmt}"
-                filepath = os.path.join(day_dir, filename)
+                # 2) format 白名单校验
+                fmt = str(thumbnail_data.get("format", "jpg")).lower().strip()
+                if fmt not in ALLOWED_THUMBNAIL_FORMATS:
+                    print(f"[TBJU] 缩略图格式不允许: {fmt}，仅支持 {ALLOWED_THUMBNAIL_FORMATS}")
+                else:
+                    # 3) 解码 + 大小校验
+                    img_bytes = base64.b64decode(img_base64)
+                    if len(img_bytes) > MAX_THUMBNAIL_BYTES:
+                        print(f"[TBJU] 缩略图过大: {len(img_bytes)} bytes，上限 {MAX_THUMBNAIL_BYTES}")
+                    elif len(img_bytes) < 8:
+                        print(f"[TBJU] 缩略图数据过短")
+                    else:
+                        # 4) 魔数校验
+                        if fmt in ("jpg", "jpeg") and not img_bytes[:3] == MAGIC_JPEG:
+                            print(f"[TBJU] 缩略图魔数不匹配 JPEG")
+                        elif fmt == "png" and not img_bytes[:4] == MAGIC_PNG:
+                            print(f"[TBJU] 缩略图魔数不匹配 PNG")
+                        else:
+                            today = datetime.now().strftime("%Y%m%d")
+                            day_dir = os.path.join(UPLOAD_DIR, today)
+                            os.makedirs(day_dir, exist_ok=True)
 
-                # 保存图片
-                img_bytes = base64.b64decode(img_base64)
-                with open(filepath, "wb") as f:
-                    f.write(img_bytes)
+                            filename = f"{safe_id}.{fmt}"
+                            filepath = os.path.join(day_dir, filename)
 
-                # 保存相对路径
-                thumbnail_path = f"uploads/thumbnails/{today}/{filename}"
-                print(f"[TBJU] 缩略图已保存: {thumbnail_path}")
+                            with open(filepath, "wb") as f:
+                                f.write(img_bytes)
+
+                            thumbnail_path = f"uploads/thumbnails/{today}/{filename}"
+                            print(f"[TBJU] 缩略图已保存: {thumbnail_path}")
         except Exception as e:
             print(f"[TBJU] 缩略图保存失败: {e}")
 
@@ -325,6 +346,11 @@ async def get_bandwidth():
 async def upload_file(request: Request):
     """接收开发板上传的 CSV 文件"""
     try:
+        # 检查 Content-Length
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > MAX_UPLOAD_BYTES:
+            return JSONResponse(status_code=413, content={"ok": False, "error": f"文件过大，上限 {MAX_UPLOAD_BYTES // 1024 // 1024}MB"})
+
         form = await request.form()
         file = form.get("file")
         device_id = form.get("device_id", "ELF2-TBJU-01")
@@ -341,14 +367,15 @@ async def upload_file(request: Request):
 
         # 文件名：session名_类型_原始文件名（清理特殊字符）
         orig_name = getattr(file, 'filename', 'data.csv')
-        # 只保留字母数字、点、下划线、横杠
-        import re as _re
-        safe_session = _re.sub(r'[^\w\-]', '_', str(session_name))
-        safe_orig = _re.sub(r'[^\w\.\-]', '_', str(orig_name))
+        safe_session = re.sub(r'[^\w\-]', '_', str(session_name))
+        safe_orig = re.sub(r'[^\w\.\-]', '_', str(orig_name))
         safe_name = f"{safe_session}_{file_type}_{safe_orig}"
         dest_path = os.path.join(dest_dir, safe_name)
 
         content = await file.read()
+        # 读取后再校验（防止 Content-Length 伪造）
+        if len(content) > MAX_UPLOAD_BYTES:
+            return JSONResponse(status_code=413, content={"ok": False, "error": f"文件过大，上限 {MAX_UPLOAD_BYTES // 1024 // 1024}MB"})
 
         # 磁盘空间检查（至少保留 100MB）
         import shutil
@@ -471,15 +498,21 @@ async def export_csv(event_type: Optional[str] = Query(default=None)):
 
 
 @app.delete("/api/events/test")
-async def delete_test_events():
-    """删除所有测试事件"""
+async def delete_test_events(request: Request):
+    """删除所有测试事件（需要 X-Admin-Token 头）"""
+    token = request.headers.get("X-Admin-Token", "")
+    if token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail={"ok": False, "error": "invalid token"})
     count = db.clear_test_events()
     return JSONResponse(content={"ok": True, "deleted": count})
 
 
 @app.delete("/api/events/all")
-async def delete_all_events():
-    """删除所有事件"""
+async def delete_all_events(request: Request):
+    """删除所有事件（需要 X-Admin-Token 头）"""
+    token = request.headers.get("X-Admin-Token", "")
+    if token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail={"ok": False, "error": "invalid token"})
     count = db.clear_all_events()
     return JSONResponse(content={"ok": True, "deleted": count})
 
@@ -488,6 +521,7 @@ async def delete_all_events():
 
 @app.post("/api/commands")
 async def create_command(request: Request):
+    """创建远程命令（看板控制接口，不需要 token）"""
     data = await request.json()
     if not data or 'action' not in data:
         return JSONResponse(status_code=400, content={'error': '缺少 action'})

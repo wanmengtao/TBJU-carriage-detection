@@ -25,7 +25,7 @@ from .utils import get_local_ipv4, validate_url
 DEFAULT_DEVICE_ID = "ELF2-TBJU-01"
 DEFAULT_SERVER_URL = os.environ.get(
     "TBJU_EVENT_SERVER_URL",
-    "http://172.20.10.11:8000/api/events",
+    "",  # 默认空，需在 GUI 或环境变量中配置
 )
 
 MAX_PAYLOAD_BYTES = 512 * 1024  # 512KB

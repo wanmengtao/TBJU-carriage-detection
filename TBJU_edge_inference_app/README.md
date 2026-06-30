@@ -76,9 +76,9 @@ TBJU_edge_inference_app/
 │
 ├── tests/                        # 测试
 │   ├── smoke_core.py             # 推理核心冒烟测试
-│   └── test_core.py              # pytest 单元测试（27 项）
+│   └── test_core.py              # pytest 单元测试（67 项）
 │
-├── tools/                        # 工具（RK3588 板端离线安装包）
+├── tools/                        # 工具（RK3588 板端离线安装包，从 Release 下载）
 │   ├── rknn_toolkit_lite2-2.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
 │   │                             # RKNN Lite2 安装包 (559KB, aarch64)
 │   └── pyqt5_wheels/             # PyQt5 离线安装包（RK3588 板端专用）
@@ -118,7 +118,28 @@ TBJU_edge_inference_app/
 
 ---
 
-## 3. 快速启动
+## 3. 离线依赖包下载
+
+RK3588 板端离线安装包（`.whl`、`.deb`）不随源码分发，从 Release 下载：
+
+1. 前往 [Releases](../../releases/latest) 页面
+2. 下载 `tools/` 相关附件
+3. 解压到 `tools/` 目录
+
+```
+tools/
+├── rknn_toolkit_lite2-2.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+└── pyqt5_wheels/
+    ├── install_pyqt5.sh
+    ├── python3-pyqt5_5.15.6_arm64.deb
+    ├── python3-pyqt5-sip_12.9.1_arm64.deb
+    ├── python3-sip_4.19.25_arm64.deb
+    └── python3-sip-dev_4.19.25_arm64.deb
+```
+
+---
+
+## 4. 快速启动
 
 ### RK3588 开发板 — 推理应用
 
@@ -127,7 +148,7 @@ TBJU_edge_inference_app/
 ```bash
 cd /home/elf/TBJU_edge_inference_app
 
-# 安装依赖
+# 安装依赖（tools/ 从 Release 下载，见下方说明）
 pip install -r requirements.txt
 pip install tools/rknn_toolkit_lite2-*.whl
 pip install pyserial
@@ -178,7 +199,7 @@ python watch_csv.py
 
 ---
 
-## 4. GUI 三标签页
+## 5. GUI 三标签页
 
 | Tab | 名称 | 功能 |
 |-----|------|------|
@@ -188,7 +209,7 @@ python watch_csv.py
 
 ---
 
-## 5. 远程看板 3 Tab 布局
+## 6. 远程看板 3 Tab 布局
 
 | Tab | 名称 | 内容 |
 |-----|------|------|
@@ -198,7 +219,7 @@ python watch_csv.py
 
 ---
 
-## 6. CSV 同步流程
+## 7. CSV 同步流程
 
 ```
 板端检测结束 → _sync_csv_to_dashboard（扫描 session + logs 目录）
@@ -215,7 +236,7 @@ PC 端 output/ 目录结构（与开发板一致）：
 
 ---
 
-## 7. 安全特性
+## 8. 安全特性
 
 - `torch.load(weights_only=True)` 防 pickle 反序列化
 - `TBJURKNNEngine._infer_lock` 推理锁（infer_frame / close / reset / load 全部在锁内）
@@ -230,7 +251,7 @@ PC 端 output/ 目录结构（与开发板一致）：
 
 ---
 
-## 8. 测试
+## 9. 测试
 
 ```bash
 # pytest 单元测试（67 项）
@@ -242,7 +263,7 @@ python run_smoke_test.py
 
 ---
 
-## 9. 核心算法：区域约束 + 短时多帧确认
+## 10. 核心算法：区域约束 + 短时多帧确认
 
 推理后处理流程：
 
@@ -278,7 +299,7 @@ YOLO 推理 → decode_yolov8()
 
 ---
 
-## 10. 依赖
+## 11. 依赖
 
 ### 主应用
 
@@ -303,7 +324,7 @@ pip install fastapi uvicorn python-multipart
 
 ---
 
-## 11. 文档索引
+## 12. 文档索引
 
 | 文档 | 内容 |
 |------|------|
@@ -314,7 +335,7 @@ pip install fastapi uvicorn python-multipart
 
 ---
 
-## 12. 相关项目
+## 13. 相关项目
 
 - [Carriage_training_pipeline](../Carriage_training_pipeline/) — 模型训练管道
 - [TBJU-carriage-detection](../../TBJU-carriage-detection/) — GitHub 仓库主页

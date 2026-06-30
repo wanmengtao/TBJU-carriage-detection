@@ -63,7 +63,7 @@ TBJU-carriage-detection/
     ├── models/                        # 预训练模型（RKNN 格式）
     │   ├── yolo/                      # YOLO 检测模型
     │   └── ocr/                       # OCR 识别模型
-    ├── tools/                         # 离线安装包
+    ├── tools/                         # 离线安装包（从 Release 下载）
     │   ├── rknn_toolkit_lite2-*.whl   # RKNN Lite2 安装包
     │   └── pyqt5_wheels/              # PyQt5 离线包
     ├── tbju-dashboard/                # Web 看板（FastAPI）
@@ -91,7 +91,7 @@ cd TBJU_edge_inference_app
 
 # 安装依赖
 pip install -r requirements.txt
-pip install tools/rknn_toolkit_lite2-*.whl
+pip install tools/rknn_toolkit_lite2-*.whl  # 从 Release 下载 tools/ 目录
 pip install pyserial
 
 # 启动 GUI
@@ -307,6 +307,27 @@ fastapi, uvicorn, python-multipart
 ## 🎬 演示视频和技术文档
 
 [待添加]
+
+---
+
+## 📥 离线依赖包下载
+
+RK3588 板端离线安装包（`.whl`、`.deb`）不随源码分发，从 Release 下载：
+
+1. 前往 [Releases](../../releases/latest) 页面
+2. 下载 `tools/` 相关附件
+3. 解压到 `TBJU_edge_inference_app/tools/` 目录
+
+```
+TBJU_edge_inference_app/tools/
+├── rknn_toolkit_lite2-2.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+└── pyqt5_wheels/
+    ├── install_pyqt5.sh
+    ├── python3-pyqt5_5.15.6_arm64.deb
+    ├── python3-pyqt5-sip_12.9.1_arm64.deb
+    ├── python3-sip_4.19.25_arm64.deb
+    └── python3-sip-dev_4.19.25_arm64.deb
+```
 
 ---
 
