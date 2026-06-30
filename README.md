@@ -58,11 +58,14 @@ TBJU-carriage-detection/
     │   ├── monitor/                   # 系统监控（CPU/GPU/NPU）
     │   └── capacity/                  # 压力测试
     ├── scripts/                       # CLI 脚本 (5个)
-    ├── tests/                         # 单元测试 (27项)
+    ├── tests/                         # 单元测试 (67项)
     ├── config/                        # 配置文件
     ├── models/                        # 预训练模型（RKNN 格式）
     │   ├── yolo/                      # YOLO 检测模型
     │   └── ocr/                       # OCR 识别模型
+    ├── tools/                         # 离线安装包
+    │   ├── rknn_toolkit_lite2-*.whl   # RKNN Lite2 安装包
+    │   └── pyqt5_wheels/              # PyQt5 离线包
     ├── tbju-dashboard/                # Web 看板（FastAPI）
     ├── assets/                        # 资源文件
     └── docs/                          # 部署文档 (5个)
@@ -203,6 +206,22 @@ FastAPI Web 应用，3 Tab 布局：
 - Tab1：总览（KPI + 告警 + 控制 + 日志）
 - Tab2：检测（事件表格 + 操作）
 - Tab3：性能（6 数值卡片 + 7 图表）
+
+### 核心算法
+
+**区域约束 + 短时多帧确认**：
+
+```
+YOLO 推理 → decode_yolov8()
+         → validate_debris_region()     ← 区域验证（不改类别）
+         → OCR（车号区域）
+         → TemporalConsistencyFilter    ← 滑动窗口内命中 M 次确认
+         → draw_detections()
+```
+
+- **区域验证**：异物落在对应区域内才保留，过滤背景误报
+- **时序一致性**：滑动窗口 5 帧，至少出现 3 次才确认告警
+- **类名校验**：支持乱序显式 ID，校验重复、缺号、格式混用
 
 ---
 
