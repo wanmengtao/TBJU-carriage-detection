@@ -278,7 +278,7 @@ YOLO 推理 → decode_yolov8()
 
 ---
 
-## 9. 依赖
+## 10. 依赖
 
 ### 主应用
 
@@ -303,7 +303,7 @@ pip install fastapi uvicorn python-multipart
 
 ---
 
-## 10. 文档索引
+## 11. 文档索引
 
 | 文档 | 内容 |
 |------|------|
@@ -314,7 +314,7 @@ pip install fastapi uvicorn python-multipart
 
 ---
 
-## 11. 相关项目
+## 12. 相关项目
 
 - [Carriage_training_pipeline](../Carriage_training_pipeline/) — 模型训练管道
 - [TBJU-carriage-detection](../../TBJU-carriage-detection/) — GitHub 仓库主页
