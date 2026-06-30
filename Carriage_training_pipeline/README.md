@@ -42,6 +42,23 @@ Carriage_training_pipeline/
 ├── requirements.txt                       # Python 依赖
 ├── README.md                              # 本文件
 │
+├── datasets/                              # [需单独获取] 转换后的数据集（YOLO 训练用）
+│   ├── output/                            #   train + val 数据
+│   │   ├── wagon_number_detection_平视/   #   nc=1, names=['TBJU_region']
+│   │   ├── wagon_number_detection_侧视/
+│   │   ├── wagon_number_ocr_平视/         #   OCR crops + labels.csv
+│   │   ├── wagon_number_ocr_侧视/
+│   │   ├── carriage_rim_debris_detection/ #   nc=2, names=['region','debris']
+│   │   ├── track_intrusion_detection/
+│   │   ├── door_state_detection/
+│   │   └── summary.txt
+│   └── test_output/                       #   test 数据
+│       ├── wagon_number_detection_test/
+│       ├── wagon_number_ocr_test/
+│       ├── carriage_rim_debris_detection_test/
+│       ├── track_intrusion_detection_test/
+│       └── door_state_detection_test/
+│
 ├── scripts/                               # 数据处理脚本
 │   ├── convert_labelstudio_tbju.py        #   车号 JSON → YOLO + OCR 数据集
 │   ├── convert_labelstudio_new.py         #   异物/车门 JSON → YOLO txt
