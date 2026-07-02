@@ -8,6 +8,7 @@ tbju_demo_gui.py — 列车车厢检测识别系统 GUI v4
 """
 
 import sys
+import os
 import time
 import re
 import base64
@@ -43,6 +44,7 @@ from src.network.event_uploader import (
     DEFAULT_DEVICE_ID, DEFAULT_SERVER_URL, EventUploader,
 )
 from src.network.command_poller import CommandPoller
+from src.flight.mavlink_receiver import MAVLinkReceiver
 
 # ============================================================
 # 路径配置
@@ -898,6 +900,14 @@ class DetectionPage(QWidget):
         monitor_layout.addWidget(self.monitor_label)
         right_layout.addWidget(monitor_group, stretch=2)
 
+        flight_group = QGroupBox('飞控状态')
+        flight_layout = QVBoxLayout(flight_group)
+        self.flight_label = QLabel('飞控: 未连接')
+        self.flight_label.setObjectName('monitor_value')
+        self.flight_label.setWordWrap(True)
+        flight_layout.addWidget(self.flight_label)
+        right_layout.addWidget(flight_group, stretch=2)
+
         right_scroll.setWidget(right_inner)
         layout.addWidget(right_scroll)
 
@@ -1150,6 +1160,23 @@ class MainWindow(QMainWindow):
         self.voice_worker = None
         self.current_result = None
         self.system_monitor = SystemMonitor()
+        # 飞控接收器（可通过环境变量 TBJU_DISABLE_FLIGHT=1/true/yes 禁用）
+        self.flight_receiver = None
+        _disable_flight = os.environ.get('TBJU_DISABLE_FLIGHT', '').lower() in ('1', 'true', 'yes', 'on')
+        if not _disable_flight:
+            try:
+                self.flight_receiver = MAVLinkReceiver(
+                    port=os.environ.get('TBJU_FLIGHT_PORT', '/dev/ttyS4'),
+                    baudrate=int(os.environ.get('TBJU_FLIGHT_BAUD', '57600')),
+                    target_system=int(os.environ.get('TBJU_FLIGHT_SYSID', '1')),
+                )
+                self.flight_receiver.start()
+            except Exception as e:
+                print(f'[飞控] 初始化失败: {e}')
+                try:
+                    self._log(f'[飞控] 初始化失败: {e}')
+                except Exception:
+                    pass
         self.voice_alarm = VoiceAlarmManager(DEFAULT_ALARM_AUDIO_DIR, enabled=True)
         self.event_uploader = EventUploader(
             DEFAULT_OUTPUT_DIR / 'network' / 'events',
@@ -1486,7 +1513,7 @@ class MainWindow(QMainWindow):
     def _system_snapshot(self):
         stats = self.system_monitor.latest()
         max_temp = max(stats.temp_zones.values()) if stats.temp_zones else 0
-        return {
+        snapshot = {
             'cpu_percent': round(stats.cpu_percent, 1),
             'memory_percent': round(stats.memory_percent, 1),
             'memory_used_mb': round(stats.memory_used_mb, 1),
@@ -1496,6 +1523,31 @@ class MainWindow(QMainWindow):
             'gpu_load_percent': round(stats.gpu_load_percent, 1) if stats.gpu_load_percent >= 0 else None,
             'timestamp': stats.timestamp,
         }
+        # 飞控快照（仅在已连接时附加，原子操作无竞态）
+        flight = self.flight_receiver.latest_if_connected() if self.flight_receiver else None
+        if flight:
+            snapshot['flight'] = {
+                'connected': True,
+                'flight_mode': flight.flight_mode,
+                'armed': flight.armed,
+                'roll_deg': round(flight.roll_deg, 1),
+                'pitch_deg': round(flight.pitch_deg, 1),
+                'yaw_deg': round(flight.yaw_deg, 1),
+                'lat': round(flight.lat, 6),
+                'lon': round(flight.lon, 6),
+                'alt_m': round(flight.alt_m, 1),
+                'relative_alt_m': round(flight.relative_alt_m, 1),
+                'north_m': round(flight.north_m, 1),
+                'east_m': round(flight.east_m, 1),
+                'groundspeed': round(flight.groundspeed, 1),
+                'airspeed': round(flight.airspeed, 1),
+                'heading': flight.heading,
+                'battery_voltage': round(flight.battery_voltage, 1),
+                'battery_remaining': flight.battery_remaining,
+                'gps_fix_type': flight.gps_fix_type,
+                'satellites_visible': flight.satellites_visible,
+            }
+        return snapshot
 
     def _thumbnail_payload(self, frame):
         if frame is None:
@@ -1880,7 +1932,7 @@ class MainWindow(QMainWindow):
         if not self.engine:
             QMessageBox.warning(self, '提示', '模型未加载')
             return
-        default_device = '/dev/video11' if sys.platform == 'linux' else '0'
+        default_device = '/dev/video21' if sys.platform == 'linux' else '0'
         self._start_inference('camera', default_device)
 
     # ── 播放控制 ──
@@ -2254,6 +2306,11 @@ class MainWindow(QMainWindow):
         stats = self.system_monitor.latest()
         # Tab1: 简洁监控
         self.detection_page.monitor_label.setText(self.system_monitor.format_display())
+        # Tab1: 飞控状态
+        if self.flight_receiver:
+            self.detection_page.flight_label.setText(self.flight_receiver.format_display())
+        else:
+            self.detection_page.flight_label.setText('飞控: 已禁用')
         # Tab2: 详细监控 + 曲线
         self.perf_page.perf_monitor_label.setText(self.system_monitor.format_display(show_sources=True))
         # GPU 状态
@@ -2360,6 +2417,8 @@ class MainWindow(QMainWindow):
         if self._sync_timer and self._sync_timer.is_alive():
             self._sync_timer.cancel()
         self._stop_voice_control()
+        if self.flight_receiver:
+            self.flight_receiver.stop()
         self.voice_alarm.close()
         self.event_uploader.close()
         if self.command_poller:

@@ -18,6 +18,9 @@ psutil>=5.9.0
 # pip install tools/rknn_toolkit_lite2-2.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
 # pyserial>=3.5
 
+# Flight controller (MAVLink)
+pymavlink>=2.4.37
+
 # Dashboard (install separately in tbju-dashboard/):
 # fastapi>=0.109.0
 # uvicorn>=0.27.0

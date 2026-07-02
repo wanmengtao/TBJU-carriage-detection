@@ -232,6 +232,36 @@ function updateDeviceCard() {
         if (sys.max_temp_c != null) document.getElementById('ovTemp').textContent = sys.max_temp_c.toFixed(1) + '°';
         if (sys.gpu_load_percent != null) document.getElementById('ovGpu').textContent = sys.gpu_load_percent.toFixed(0) + '%';
         else document.getElementById('ovGpu').textContent = 'N/A';
+        // 飞控数据
+        const fl = sys.flight;
+        const flStatus = document.getElementById('ovFlightStatus');
+        const flMode = document.getElementById('ovFlightMode');
+        const flAlt = document.getElementById('ovAlt');
+        const flNorth = document.getElementById('ovNorth');
+        const flEast = document.getElementById('ovEast');
+        const flSpeed = document.getElementById('ovSpeed');
+        const flBat = document.getElementById('ovBat');
+        const flGps = document.getElementById('ovGps');
+        if (!flStatus || !flMode || !flAlt || !flSpeed || !flBat || !flGps) return;
+        if (fl && fl.connected) {
+            flStatus.innerHTML = '<span class="dot online-dot"></span> ' + (fl.armed ? '已解锁' : '已锁定');
+            flMode.textContent = fl.flight_mode || '--';
+            flAlt.textContent = fl.relative_alt_m != null ? fl.relative_alt_m.toFixed(1) + 'm' : '--';
+            if (flNorth) flNorth.textContent = fl.north_m != null ? (fl.north_m >= 0 ? '北' : '南') + Math.abs(fl.north_m).toFixed(0) + 'm' : '--';
+            if (flEast) flEast.textContent = fl.east_m != null ? (fl.east_m >= 0 ? '东' : '西') + Math.abs(fl.east_m).toFixed(0) + 'm' : '--';
+            flSpeed.textContent = fl.groundspeed != null ? fl.groundspeed.toFixed(1) + 'm/s' : '--';
+            flBat.textContent = fl.battery_voltage > 0 ? fl.battery_voltage.toFixed(1) + 'V' + (fl.battery_remaining >= 0 ? ' ' + fl.battery_remaining + '%' : '') : '--';
+            flGps.textContent = (fl.lat != 0 || fl.lon != 0) ? fl.lat.toFixed(6) + ', ' + fl.lon.toFixed(6) : '--';
+        } else {
+            flStatus.innerHTML = '<span class="dot offline-dot"></span> 未连接';
+            flMode.textContent = '--';
+            flAlt.textContent = '--';
+            if (flNorth) flNorth.textContent = '--';
+            if (flEast) flEast.textContent = '--';
+            flSpeed.textContent = '--';
+            flBat.textContent = '--';
+            flGps.textContent = '--';
+        }
     }
     // 上传链路状态
     const linkEl = document.getElementById('ovLinkStatus');
@@ -392,6 +422,25 @@ async function showEventDetail(eventId) {
             if (system.max_temp_c != null) html += detailItem('温度', system.max_temp_c + '°C');
             if (system.npu_load_percent != null) html += detailItem('NPU', system.npu_load_percent + '%');
             html += '</div></div>';
+
+            // 飞控快照
+            const fl = system.flight;
+            if (fl && fl.connected) {
+                html += '<div class="detail-section"><h3>🚁 飞控快照</h3><div class="detail-grid">';
+                html += detailItem('飞行模式', fl.flight_mode);
+                html += detailItem('解锁状态', fl.armed ? '已解锁' : '已锁定');
+                html += detailItem('相对高度', fl.relative_alt_m + ' m');
+                if (fl.north_m != null) html += detailItem('南北距离', (fl.north_m >= 0 ? '北 ' : '南 ') + Math.abs(fl.north_m).toFixed(1) + ' m');
+                if (fl.east_m != null) html += detailItem('东西距离', (fl.east_m >= 0 ? '东 ' : '西 ') + Math.abs(fl.east_m).toFixed(1) + ' m');
+                html += detailItem('地速', fl.groundspeed + ' m/s');
+                html += detailItem('航向', fl.heading + '°');
+                if (fl.lat != 0 || fl.lon != 0) html += detailItem('GPS坐标', fl.lat.toFixed(6) + ', ' + fl.lon.toFixed(6));
+                if (fl.alt_m != 0) html += detailItem('海拔', fl.alt_m + ' m');
+                html += detailItem('姿态', 'R=' + fl.roll_deg + '° P=' + fl.pitch_deg + '° Y=' + fl.yaw_deg + '°');
+                if (fl.battery_voltage > 0) html += detailItem('电池', fl.battery_voltage + 'V' + (fl.battery_remaining >= 0 ? ' (' + fl.battery_remaining + '%)' : ''));
+                html += detailItem('GPS定位', 'type=' + fl.gps_fix_type + ' (' + fl.satellites_visible + '颗星)');
+                html += '</div></div>';
+            }
         }
 
         if (timing && Object.keys(timing).length > 0) {

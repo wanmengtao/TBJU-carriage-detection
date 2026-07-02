@@ -485,7 +485,7 @@ class App:
         if not self.engine:
             messagebox.showwarning('提示', '模型未加载')
             return
-        default_device = '/dev/video11' if sys.platform == 'linux' else '0'
+        default_device = '/dev/video21' if sys.platform == 'linux' else '0'
         self._start_inference('camera', default_device)
 
     def _start(self):

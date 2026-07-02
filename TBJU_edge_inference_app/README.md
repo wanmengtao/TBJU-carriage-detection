@@ -48,6 +48,8 @@ TBJU_edge_inference_app/
 │   │   └── voice_alarm.py        # 声音报警模块（queue maxsize=50）
 │   ├── capacity/
 │   │   └── tbju_capacity_test.py  # 扩展能力压测（1/2/4 ROI，流式 CSV）
+│   ├── flight/
+│   │   └── mavlink_receiver.py   # PX4 飞控 MAVLink 数据接收（姿态/GPS/电池/距起飞点距离）
 │   └── network/
 │       ├── utils.py              # 公共网络工具（get_local_ipv4, validate_url）
 │       ├── event_uploader.py     # 事件上传（显式 start，200MB 磁盘限额，CSV 同步）
@@ -58,7 +60,8 @@ TBJU_edge_inference_app/
 │   ├── inference_tbju_stream.py   # 视频/摄像头推理
 │   ├── inference_tbju_merged.py   # 统一模型推理（备份）
 │   ├── voice_alarm_test.py        # 声音报警 CLI 测试
-│   └── voice_ld3320_test.py       # LD3320 串口测试
+│   ├── voice_ld3320_test.py       # LD3320 串口测试
+│   └── mavlink_test.py            # PX4 飞控 MAVLink 数据接收测试
 │
 ├── models/                       # 模型文件（需从训练管道导出）
 │   ├── yolo/
@@ -305,7 +308,7 @@ YOLO 推理 → decode_yolov8()
 
 ```bash
 # 通用依赖
-pip install opencv-python numpy PyQt5 psutil
+pip install opencv-python numpy PyQt5 psutil pymavlink
 
 # Windows 专用
 pip install ultralytics torch onnxruntime

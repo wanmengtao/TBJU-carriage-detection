@@ -223,6 +223,7 @@ body {
 .device-metric { text-align: center; background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 10px 8px; }
 .dm-value { font-size: 18px; font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); }
 .dm-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.device-section-title { font-size: 13px; font-weight: 600; color: var(--accent-blue); margin: 8px 0 4px; }
 
 /* ===== Tab2: 检测 — 事件表格 ===== */
 .event-list-section {

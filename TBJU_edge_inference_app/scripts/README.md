@@ -53,7 +53,7 @@ python scripts/inference_tbju.py --image test.jpg --output results/
 python scripts/inference_tbju_stream.py --video demo.mp4 --output result.avi
 
 # 摄像头实时推理
-python scripts/inference_tbju_stream.py --camera /dev/video11 --show --fps 30
+python scripts/inference_tbju_stream.py --camera /dev/video21 --show --fps 30
 
 # 使用所有 NPU 核心，每 2 帧推理一次
 python scripts/inference_tbju_stream.py --video demo.mp4 --every_n 2 --all_cores
